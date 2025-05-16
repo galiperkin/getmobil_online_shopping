@@ -1,0 +1,108 @@
+@model WebApplication1.Models.Cart
+
+@{
+    ViewData["Title"] = "My Cart";
+    var error = TempData["ErrorMessage"] as string;
+}
+
+<div class="justify-content-between">
+    
+    <h1>My Cart</h1>
+    <hr />
+    @if (Model.CartItems.Any())
+    {
+        <div class="cart-summary mb-4">
+            @{
+                
+                var netTotal = Model.CartItems
+                    .Sum(i => i.Quantity * i.Product.DiscountedNetPriceDecimal);
+                var vatTotal = Model.CartItems
+                    .Sum(i => i.Quantity * i.Product.DiscountedVatAmountDecimal);
+                var grossTotal = Model.CartItems
+                    .Sum(i => i.Quantity * i.Product.DiscountedGrossPriceDecimal);
+            }
+
+            <div class="row">
+                <div class="col">
+                    <strong>Net Total:</strong>
+                    <span>@netTotal.ToString("C")</span>
+                </div>
+                <div class="col">
+                    <strong>Total VAT:</strong>
+                    <span>@vatTotal.ToString("C")</span>
+                </div>
+                <div class="col">
+                    <strong>Gross Total:</strong>
+                    <span>@grossTotal.ToString("C")</span>
+                </div>
+                <div class="col">
+                <form asp-controller="Order" asp-action="PlaceOrder" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-primary mb-2">Place Order</button>
+                </form>
+                </div>
+            </div>
+        </div>
+
+ 
+    }
+</div>
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger" role="alert">
+        @error
+    </div>
+}
+
+<div>
+    <hr />
+    <dl class="row">
+        @if (Model.CartItems.Count < 1)
+        {
+            <a asp-controller="Home" asp-action="Index"> <h2>Cart Is Empty, Add More Products</h2></a>
+            
+        }
+        else
+        {
+            <div class="product-grid">
+                @foreach (var item in Model.CartItems)
+                {
+                    <a asp-controller="Product"
+                       asp-action="Details"
+                       asp-route-id="@item.Id"
+                       class="card-link">
+
+
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="@Html.DisplayFor(modelItem => item.Product.Image)" alt="@Html.DisplayFor(modelItem => item.Product.Name)">
+                            </div>
+                            <h3>@Html.DisplayFor(modelItem => item.Product.Name)</h3>
+                            <p>@Html.DisplayFor(modelItem => item.Product.GrossPriceCurrency)</p>
+                            <div class="quantity-controls mb-2">
+                                <form asp-action="ChangeQuantity" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="cartItemId" value="@item.Id"/>
+                                    <input type="hidden" name="quantityChange" value="-1"/>
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">–</button>
+                                </form>
+
+                                <span class="mx-2">@item.Quantity</span>
+
+                                <form asp-controller="Cart" asp-action="ChangeQuantity" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="cartItemId" value="@item.Id"/>
+                                    <input type="hidden" name="quantityChange" value="1"/>
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                                </form>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </dl>
+    
+
+
+</div>

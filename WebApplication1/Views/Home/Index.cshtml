@@ -1,8 +1,60 @@
-﻿@{
+﻿@model IEnumerable<WebApplication1.Models.Product>
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Welcome to OnlineShopping</h1>
+    
+    <div class="product-grid">
+        @foreach (var item in Model) {
+            <a asp-controller="Product"
+               asp-action="Details"
+               asp-route-id="@item.Id"
+               class="card-link"
+               >
+               
+            
+                   <div class="product-card">
+                       <div class="product-image">
+                           <img src="@item.Image" alt="@item.Name" />
+                       </div>
+                       <h3>@item.Name</h3>
+
+                       @if (item.DiscountPercent > 0)
+                       {
+                           <p>
+                               <span class="text-danger fw-bold">
+                                   –@item.DiscountPercent% 
+                               </span>
+                               <span class="text-decoration-line-through text-muted">
+                                   @item.GrossPriceCurrency
+                               </span>
+                               <strong class="ms-2">
+                                   @item.DiscountedGrossPriceCurrency
+                               </strong>
+                           </p>
+                       }
+                       else
+                       {
+                           <p>@item.GrossPriceCurrency</p>
+                       }
+
+                       @if (item.InStock)
+                       {
+                           <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                               @Html.AntiForgeryToken()
+                               <input type="hidden" name="productId" value="@item.Id" />
+                               <button type="submit" class="btn btn-primary mb-2">Add to Cart</button>
+                           </form>
+                       }
+                       else
+                       {
+                           <span class="text-danger mb-2">Not in stock</span>
+                       }
+                   </div>
+
+               </a>
+        }
+    </div>
 </div>

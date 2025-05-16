@@ -1,0 +1,33 @@
+﻿version: "3.8"
+
+services:
+  webapplication1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        Configuration: Release
+    image: webapplication1:latest
+
+
+    user: root
+
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Data Source=/app/Data/webapp1.db
+
+    ports:
+      - "5001:8080"
+
+    volumes:
+      - webapp1_sqlite:/app/Data
+
+    
+    entrypoint: |
+      /bin/sh -c "
+        chmod -R 777 /app/Data && \
+        dotnet WebApplication1.dll
+      "
+
+volumes:
+  webapp1_sqlite:

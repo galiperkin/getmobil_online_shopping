@@ -1,0 +1,48 @@
+@model IEnumerable<WebApplication1.Models.Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+    var error = TempData["ErrorMessage"] as string;
+}
+
+<h1>My Orders</h1>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (!Model.Any())
+{
+    <a asp-controller="Home" asp-action="Index">
+        <h2>No orders yet! Continue Shopping</h2>
+    </a>
+}
+else
+{
+    <div class="order-grid">
+        @foreach (var order in Model)
+        {
+            <a asp-controller="Order"
+               asp-action="MyOrderDetails"
+               asp-route-id="@order.Id"
+               class="card-link">
+
+                <div class="order-card">
+                    <!-- if you have an image URL on Order or its items: -->
+                    <img
+                        src="@(order.OrderItems.FirstOrDefault()?.Image)"
+                        alt="Order #@order.Id" />
+
+                    <div class="order-info">
+                        <div><strong>Order #:</strong> @order.Id</div>
+                        <div><strong>Date:</strong> @order.CreatedAt.ToString("MMM d, yyyy")</div>
+                        <div><strong>Total:</strong> @order.TotalGrossPriceCurrency</div>
+                        <div><strong>Status:</strong> @order.Status</div>
+                    </div>
+                </div>
+
+            </a>
+        }
+    </div>
+}

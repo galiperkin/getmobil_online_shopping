@@ -1,0 +1,83 @@
+@model WebApplication1.Models.Invoice
+
+@{
+    ViewData["Title"] = "Invoice Details";
+    var created = Model.CreatedAt.ToLocalTime().ToString("dd MMM yyyy");
+}
+
+<div class="invoice-container p-4 bg-white rounded shadow-sm">
+  <!-- Invoice Header -->
+  <div class="d-flex justify-content-between mb-4">
+    <div>
+      <h2>INVOICE</h2>
+      <p><strong>#@Model.Id</strong></p>
+    </div>
+    <div class="text-end">
+      <p><strong>Date:</strong> @created</p>
+      <!-- optionally: Billing info here -->
+      <!-- <p><strong>Bill To:</strong> Jane Doe<br/>123 Main St<br/>Istanbul, TR</p> -->
+    </div>
+  </div>
+
+  <!-- Line Items Table -->
+  <table class="table table-bordered mb-4">
+    <thead class="table-light">
+      <tr>
+        <th class="text-center">Qty</th>
+        <th>Description</th>
+        <th class="text-end">Unit Price</th>
+        <th class="text-end">Net</th>
+        <th class="text-end">VAT</th>
+        <th class="text-end">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach (var item in Model.InvoiceItems)
+      {
+        <tr>
+          <td class="text-center">@item.Quantity</td>
+          <td>
+            <strong>@item.Name</strong><br />
+            <small class="text-muted">@item.Description</small>
+          </td>
+          <td class="text-end">@item.UnitGrossCurrency</td>
+          <td class="text-end">@item.TotalNetCurrency</td>
+          <td class="text-end">@item.TotalVatAmountCurrency</td>
+          <td class="text-end">@item.TotalGrossCurrency</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <!-- Totals Summary -->
+  @{
+      var netTotal   = Model.InvoiceItems.Sum(i => i.TotalNetDecimal);
+      var vatTotal   = Model.InvoiceItems.Sum(i => i.TotalVatAmountDecimal);
+      var grossTotal = Model.InvoiceItems.Sum(i => i.TotalGrossDecimal);
+  }
+  <div class="d-flex justify-content-end">
+    <table class="table table-borderless w-auto">
+      <tbody>
+        <tr>
+          <td><strong>Net Total:</strong></td>
+          <td class="text-end">@netTotal.ToString("C")</td>
+        </tr>
+        <tr>
+          <td><strong>Total VAT:</strong></td>
+          <td class="text-end">@vatTotal.ToString("C")</td>
+        </tr>
+        <tr class="fw-bold">
+          <td><strong>Amount Due:</strong></td>
+          <td class="text-end">@grossTotal.ToString("C")</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Back Button -->
+  <div class="mt-4">
+    <form asp-controller="Order" asp-action="MyOrderDetails" asp-route-id="@Model.Id">
+      <button type="submit" class="btn btn-outline-primary">Back to Order</button>
+    </form>
+  </div>
+</div>
